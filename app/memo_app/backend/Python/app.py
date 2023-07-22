@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 # データベースファイルを作成するディレクトリを指定
-database_directory = 'C:/Users/yamah/OneDrive/ドキュメント/ProjectRoot/backend/memo_app/database'
+database_directory = 'C:/Users/yamah/OneDrive/ドキュメント/ProjectRoot/app/memo_app/backend/database'
 dbname = 'Memo.db'  # データベース名
 database_file = os.path.join(database_directory, dbname)
 

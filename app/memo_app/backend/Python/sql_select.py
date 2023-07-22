@@ -2,7 +2,7 @@ import sqlite3
 import os
 
 # データベースファイルが保存されているディレクトリのパス
-database_directory = 'C:/Users/yamah/OneDrive/ドキュメント/ProjectRoot/memo_app/backend/database'
+database_directory = 'C:/Users/yamah/OneDrive/ドキュメント/ProjectRoot/app/memo_app/backend/database'
 
 # データベース名
 dbname = 'Memo.db'
