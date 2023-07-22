@@ -1,0 +1,6 @@
+{
+    "gitlens.statusBar.enabled": true,
+    "gitlens.statusBar.alignment": "right",
+    "gitlens.statusBar.pullRequests.enabled": true,
+    "gitlens.currentLine.enabled": false
+}

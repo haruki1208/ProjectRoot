@@ -8,11 +8,11 @@ conn = sqlite3.connect(dbname)
 cur = conn.cursor()
 
 # 3.テーブルのデータを更新・削除
-# データ更新（例ではカラム「name」の「Takahashi」を「Tanaka」に変更します）
-cur.execute('UPDATE persons SET name = "Tanaka" WHERE name = "Takahashi"')
+# データ更新
+cur.execute('UPDATE memos SET tag = "メモ1" WHERE tag = "メモ"')
 
-# データ削除（例ではカラム「name」の「Suzuki」を削除します）
-cur.execute('DELETE FROM persons WHERE name = "Suzuki"')
+# データ削除
+cur.execute('DELETE FROM memos WHERE sentence = "こんにちは"')
 
 # 取得したデータはカーソルの中に入る
 for row in cur:
