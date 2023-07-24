@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 import sqlite3
 import datetime
 from flask_cors import CORS
+import threading
 
 app = Flask(__name__)
 CORS(app)
@@ -78,10 +79,23 @@ def create_memo(tag, sentence):
         return True, 'Memo created successfully!'
     except Exception as e:
         return False, 'Failed to create memo: ' + str(e)
+    
+def shutdown_background():
+    # サーバーの終了処理を実行
+    os._exit(0)
 
 
 # テーブルがなければ作成
 create_table()
+
+##########
+# APIエンドポイント定義
+##########
+
+# @app.route('/')
+# def index():
+#     file_path = r'C:/Users/yamah/OneDrive/ドキュメント/ProjectRoot/app/memo_app/frontend/index.html'
+#     return send_file(file_path)
 
 # メモのAPIエンドポイント
 @app.route('/api/memos', methods=['GET', 'POST'])
@@ -106,7 +120,13 @@ def memos():
         except Exception as e:
             return jsonify({'error': 'Failed to create memo: ' + str(e)}), 500
 
+@app.route('/close', methods=['POST'])
+def shutdown_server():
+    # print('POSTは来ている')
+    # 強制終了してしまう
+    shutdown_background()
+    return jsonify({"message": "POSTリクエストを受け付けました"}), 200
+    # return jsonify(message)
 
 if __name__ == '__main__':
-    # app.run(debug=True)
     app.run()
