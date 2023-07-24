@@ -3,16 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const memosList = document.getElementById('memosList');
 
     // window.locationを使用して現在のホストとポート番号を取得
-    const host = window.location.hostname || 'localhost';
+    const host = window.location.hostname || '127.0.0.1';   // http://127.0.0.1:5000 localhost
     const port = window.location.port || '5000';
     
     // PythonサーバーのエンドポイントURLを動的に構築
-    const url = `http://${host}:${port}/api/memos`;
-    // console.log(url)
+    const url = `http://${host}:${port}`;
+    console.log(url)
 
     // メモの一覧を取得して表示する関数
     function displayMemos() {
-        fetch(url)
+        fetch(url+'/api/memos')
         .then(response => response.json())
         .then(data => {
             memosList.innerHTML = '';
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sentence = document.getElementById('sentence').value;
 
         // メモを追加するためのリクエストを送信
-        fetch(url, {
+        fetch(url+'/api/memos', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -47,7 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // メモの追加が成功したら、メモの一覧を更新して表示
             displayMemos();
         })
-        .catch(error => console.error('Error adding memo:', error));
+        // .catch(error => console.error('Error adding memo:', error));
     });
+
+
+    // ウィンドウが閉じられる際に実行される関数
+    window.addEventListener('unload', function() {
+        console.log("Window is closing...");
+        navigator.sendBeacon(url+'/close', '');
+    });
+
 });
 
