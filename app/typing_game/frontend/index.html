@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>タイピングゲーム</title>
+</head>
+<body>
+    <h1>タイレン-tyren-</h1>
+
+    <!-- ホーム画面 -->
+    <div id="homeScreen">
+        <label for="userSelect">ユーザー選択:</label>
+        <select id="userSelect">
+            <option value="">新規ユーザー</option>
+            <!-- サーバーから取得したユーザーリストをここに表示 -->
+        </select>
+        <button onclick="startGame()">ゲームスタート</button>
+        <button onclick="showRegistrationScreen()">ユーザー登録</button>
+    </div>
+
+    <!-- ゲーム画面 -->
+    <div id="gameScreen" style="display: none;">
+        <p id="wordDisplay">ここに単語が表示されます。</p>
+        <p id="romajiDisplay">ローマ字が表示されます。</p>
+        <input type="text" id="userInput" oninput="checkWord()">
+        <p id="result">結果: <span id="score">0</span> タイプ</p>
+        <button onclick="endGame()">ゲーム中断</button>
+    </div>
+
+    <!-- ユーザー登録画面 -->
+    <div id="registrationScreen" style="display: none;">
+        <label for="usernameInput">ユーザー名:</label>
+        <input type="text" id="usernameInput">
+        <button onclick="registerUser()">登録</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
