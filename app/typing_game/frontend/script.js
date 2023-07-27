@@ -11,6 +11,118 @@ window.addEventListener('unload', function() {
     navigator.sendBeacon(url+'/close', '');
 });
 
+// ページが読み込まれた際にユーザー名を取得する関数を実行
+window.onload = function() {
+    getUserNamesFromServer();
+};
+
+/////////////////////////
+// 画面関連
+/////////////////////////
+
+// ホーム → ユーザー登録画面
+function showRegistrationScreen() {
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('registrationScreen').style.display = 'block';
+}
+
+// ユーザー登録画面 → ホーム画面
+function hideRegistrationScreen() {
+    document.getElementById('registrationScreen').style.display = 'none';
+    document.getElementById('homeScreen').style.display = 'block';
+    getUserNamesFromServer();
+}
+
+// 登録せずにホーム画面に戻る
+function goBackToHome() {
+    hideRegistrationScreen();
+}
+
+// ホーム画面に登録済みのユーザー名を表示するために取得
+// function displayMemos() {
+//     fetch(url+'/get_user_names')
+//     .then(response => response.json())
+//     .then(data => {
+//         memosList.innerHTML = '';
+//         data.forEach(memo => {
+//             const listItem = document.createElement('li');
+//             listItem.textContent = `ID: ${memo.id}, Tag: ${memo.tag}, Sentence: ${memo.sentence}, Date: ${memo.date}`;
+//             memosList.appendChild(listItem);
+//         });
+//     })
+//     .catch(error => console.error('Error fetching memos:', error));
+// }
+
+
+// ユーザ名を取得する関数
+function getUserNamesFromServer() {
+    // XMLHttpRequestオブジェクトを作成
+    var xhr = new XMLHttpRequest();
+
+    // GETリクエストを発行
+    xhr.open('GET', url+'/get_user_names', true);
+
+    // レスポンスが返ってきた時の処理
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // サーバーから取得したデータをJSON形式からJavaScriptオブジェクトに変換
+            var response = JSON.parse(xhr.responseText);
+
+            // ユーザーリストを取得してプルダウンリストに表示
+            var userSelect = document.getElementById("userSelect");
+            userSelect.innerHTML = '<option value="">選択してください</option>'; // 初期オプションを追加
+            response.forEach(function (user) {
+                var option = document.createElement("option");
+                option.value = user;
+                option.text = user;
+                userSelect.appendChild(option);
+            });
+        }
+    };
+
+    // リクエストを送信
+    xhr.send();
+}
+
+
+////////////////////////
+// ユーザー登録関連
+////////////////////////
+// ユーザー登録関数
+function registerUser() {
+    const username = document.getElementById('usernameInput').value.trim();
+    if (username !== '') {
+        // サーバーにユーザー名を送信するリクエスト
+        fetch(url+'/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "username": username }) // ユーザー名をオブジェクトとして送信
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.username);
+            clearusernameInput();
+            // ユーザー登録が完了したら、ホーム画面に戻る
+            hideRegistrationScreen();
+        });
+    } else {
+        alert('ユーザー名を入力してください。');
+    }
+}
+
+// ユーザ名入力欄をクリアする
+function clearusernameInput() {
+    document.getElementById('usernameInput').value = '';
+}
+
+
+
+/////////////////////
+// ゲーム関連
+/////////////////////
+
 // ランダムにワードを取得する
 async function getRandomWord() {
     const response = await fetch(url+'/get_random_word');
@@ -50,6 +162,7 @@ let words = [];
 let currentIndex = 0;
 let score = 0;
 
+// サーバーから単語を全部取得する関数
 function fetchWords() {
     // サーバーから単語を取得する関数（バックエンドとの通信）
     // getRandomWord()
@@ -57,6 +170,7 @@ function fetchWords() {
     words = ['こんにちは', 'ありがとう', 'さようなら', 'おはよう', 'おやすみ'];
 }
 
+// 単語表示関数
 function displayWord() {
     document.getElementById('wordDisplay').textContent = words[currentIndex];
     // ここで対応するローマ字も表示する処理を追加
@@ -81,6 +195,7 @@ function checkWord() {
     }
 }
 
+// ゲームスタート
 function startGame() {
     fetchWords();
     currentIndex = 0;
@@ -95,6 +210,7 @@ function startGame() {
     }, 180000); // 3分後にゲーム終了
 }
 
+// ゲーム終了
 function endGame() {
     document.getElementById('result').textContent = `結果: ${score} タイプ`;
     document.getElementById('homeScreen').style.display = 'block';
@@ -103,19 +219,6 @@ function endGame() {
     // ここではサンプルとして送信しないで表示のみ行います
 }
 
-function showRegistrationScreen() {
-    document.getElementById('homeScreen').style.display = 'none';
-    document.getElementById('registrationScreen').style.display = 'block';
-}
 
-function registerUser() {
-    const username = document.getElementById('usernameInput').value.trim();
 
-    if (username !== '') {
-        // サーバーにユーザー登録情報を送信する関数（バックエンドとの通信）
-        // ここではサンプルとして送信しないで画面遷移のみ行います
-        document.getElementById('homeScreen').style.display = 'block';
-        document.getElementById('registrationScreen').style.display = 'none';
-        document.getElementById('userSelect').innerHTML += `<option value="${username}">${username}</option>`;
-    }
-}
+

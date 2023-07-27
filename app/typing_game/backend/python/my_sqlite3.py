@@ -17,7 +17,7 @@ cursor = conn.cursor()
 
 # インサート
 # cursor.execute('''INSERT INTO users (username)
-#                    VALUES ("haruki")
+#                    VALUES ("test")
 #                 ''')
 
 # デリート

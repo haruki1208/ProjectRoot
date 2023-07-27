@@ -8,9 +8,9 @@
 
     <!-- ホーム画面 -->
     <div id="homeScreen">
-        <label for="userSelect">ユーザー選択:</label>
+        <label for="userSelect">ユーザー:</label>
         <select id="userSelect">
-            <option value="">新規ユーザー</option>
+            <option value="">選択してください</option>
             <!-- サーバーから取得したユーザーリストをここに表示 -->
         </select>
         <button onclick="startGame()">ゲームスタート</button>
@@ -31,6 +31,7 @@
         <label for="usernameInput">ユーザー名:</label>
         <input type="text" id="usernameInput">
         <button onclick="registerUser()">登録</button>
+        <button onclick="goBackToHome()">戻る</button>
     </div>
 
     <script src="script.js"></script>

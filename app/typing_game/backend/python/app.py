@@ -1,99 +1,126 @@
 import os
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import random
 import sqlite3
 
 app = Flask(__name__)
+CORS(app)  # すべてのリクエストに対してCORSを有効にする
 
-# @app.route("/api/check_input", methods=["POST"])
-# def check_input():
-#     data = request.json
-#     sentence = data["sentence"].strip()
-#     typed_text = data["typed_text"].strip()
-#     if typed_text == sentence:
-#         return jsonify({"result": "正解！"})
-#     return jsonify({"result": "不正解"})
 
+######################
+# アプリ停止 → python停止
+######################
 # ウィンドウを閉じたらpythonも閉じる
 @app.route('/close', methods=['POST'])
 def shutdown_server():
+    # 後でもう少しちゃんと停止する関数にする
     os._exit(0)
-    # return jsonify({"message": "POSTリクエストを受け付けました"}), 200
 
-# SQLite3 Database Setup
+
+######################
+# データベース関連
+######################
+# データベースセット
 database_directory = 'C:/Users/yamah/OneDrive/ドキュメント/ProjectRoot/app/typing_game/backend/database/'
 dbname = 'tyren_game.db'  # データベース名
-# database_file = os.path.join(database_directory, dbname)
 conn = sqlite3.connect(database_directory+dbname)
 cursor = conn.cursor()
+# ユーザーテーブル
 cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL UNIQUE
                 )''')
+# スコアテーブル
 cursor.execute('''CREATE TABLE IF NOT EXISTS game_results (
                     id INTEGER PRIMARY KEY,
                     user_id INTEGER,
                     count INTEGER,
                     FOREIGN KEY (user_id) REFERENCES users (id)
                 )''')
+# タイピング単語テーブル
+cursor.execute('''CREATE TABLE IF NOT EXISTS typing_words (
+                    id INTEGER,
+                    genre TEXT NOT NULL UNIQUE,
+                    word TEXT,
+                    PRIMARY KEY (id, genre)
+                )''')
 conn.commit()
 
-# Sample word list
-WORD_LIST = ['apple', 'banana', 'cherry', 'date', 'elderberry', 'fig', 'grape']
-
-@app.route('/get_random_word', methods=['GET'])
-def get_random_word():
-    word = random.choice(WORD_LIST)
-    return jsonify({'word': word})
-
-@app.route('/save_game_result', methods=['POST'])
-def save_game_result():
-    data = request.get_json()
-    typed_count = data.get('count')
+# ユーザー名をテーブルに登録する関数
+def insert_user(username):
+    conn = sqlite3.connect(database_directory+dbname)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO users (username) VALUES (?)", (username,))
+    conn.commit()
+    conn.close()
     
-    # Here, you can implement user registration/login functionality
-    # and get the user ID based on the logged-in user.
+# ユーザー名を取得
+def select_username():
+    try:
+        # データベースに接続
+        conn = sqlite3.connect(database_directory+dbname)
+        cursor = conn.cursor()
+        # ユーザーテーブルからユーザー名を取得
+        cursor.execute("SELECT username FROM users")
+        # usernames = cursor.fetchall()
+        user_names = [row[0] for row in cursor.fetchall()]
+        # データベース接続を閉じる
+        cursor.close()
+        conn.close()
+        
+        #     # メモを辞書型のリストに変換
+        # username_list = []
+        # for username in usernames:
+        #     username_dict = {
+        #         'id': username[0]
+        #     }
+        #     username_list.append(username_dict)
 
-    user_id = 1  # Replace this with the actual user ID
+        return user_names
+    except Exception as e:
+        return {'error': 'Failed to fetch user_names: ' + str(e)}
+    
 
-    cursor.execute('INSERT INTO game_results (user_id, count) VALUES (?, ?)', (user_id, typed_count))
-    conn.commit()
-    return jsonify({'message': 'Game result saved successfully!'})
+########################
+# エンドポイント
+########################
+# ユーザー登録
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json # JSON形式のデータを取得
+    username = data.get('username')
+    if username:
+        try:
+            insert_user(username)
+            return {"username": username, "message": "ユーザー登録が完了しました。"}
+        except sqlite3.IntegrityError:
+            return {"message": "そのユーザー名は既に存在します。"}, 409
+    else:
+        return {"message": "ユーザー名を入力してください。"}, 400
 
-if __name__ == '__main__':
-    app.run()
+@app.route('/get_user_names', methods=['GET'])
+def get_user_names():
+    user_names = select_username()   # ユーザー名を取得
+    # JSON形式でクライアントにデータを返す
+    return jsonify(user_names)
 
 
+# @app.route('/get_word', methods=['GET'])
+# def get_word():
+#     word = random.choice(WORDS)
+#     return jsonify({'word': word})
 
-from flask import Flask, request, jsonify
-import sqlite3
-import random
+# @app.route('/save_score', methods=['POST'])
+# def save_score():
+#     data = request.get_json()
+#     username = data['username']
+#     score = data['score']
 
-app = Flask(__name__)
+#     c.execute('INSERT INTO scores (username, score) VALUES (?, ?)', (username, score))
+#     conn.commit()
 
-# データベース初期化
-conn = sqlite3.connect('tyren.db')
-c = conn.cursor()
-c.execute('CREATE TABLE IF NOT EXISTS scores (username TEXT, score INTEGER)')
-
-# サンプルの単語リスト
-WORDS = ['こんにちは', 'ありがとう', 'さようなら', 'おはよう', 'おやすみ']
-
-@app.route('/get_word', methods=['GET'])
-def get_word():
-    word = random.choice(WORDS)
-    return jsonify({'word': word})
-
-@app.route('/save_score', methods=['POST'])
-def save_score():
-    data = request.get_json()
-    username = data['username']
-    score = data['score']
-
-    c.execute('INSERT INTO scores (username, score) VALUES (?, ?)', (username, score))
-    conn.commit()
-
-    return jsonify({'message': 'スコアが保存されました'})
+#     return jsonify({'message': 'スコアが保存されました'})
 
 if __name__ == '__main__':
     app.run()
