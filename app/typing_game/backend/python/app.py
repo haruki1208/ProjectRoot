@@ -1,7 +1,6 @@
 import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import random
 import sqlite3
 
 app = Flask(__name__)
@@ -47,6 +46,10 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS typing_words (
                 )''')
 conn.commit()
 
+###################
+# 関数定義
+###################
+
 # ユーザー名をテーブルに登録する関数
 def insert_user(username):
     conn = sqlite3.connect(database_directory+dbname)
@@ -68,14 +71,6 @@ def select_username():
         # データベース接続を閉じる
         cursor.close()
         conn.close()
-        
-        #     # メモを辞書型のリストに変換
-        # username_list = []
-        # for username in usernames:
-        #     username_dict = {
-        #         'id': username[0]
-        #     }
-        #     username_list.append(username_dict)
 
         return user_names
     except Exception as e:
@@ -104,23 +99,6 @@ def get_user_names():
     user_names = select_username()   # ユーザー名を取得
     # JSON形式でクライアントにデータを返す
     return jsonify(user_names)
-
-
-# @app.route('/get_word', methods=['GET'])
-# def get_word():
-#     word = random.choice(WORDS)
-#     return jsonify({'word': word})
-
-# @app.route('/save_score', methods=['POST'])
-# def save_score():
-#     data = request.get_json()
-#     username = data['username']
-#     score = data['score']
-
-#     c.execute('INSERT INTO scores (username, score) VALUES (?, ?)', (username, score))
-#     conn.commit()
-
-#     return jsonify({'message': 'スコアが保存されました'})
 
 if __name__ == '__main__':
     app.run()

@@ -19,10 +19,11 @@
 
     <!-- ゲーム画面 -->
     <div id="gameScreen" style="display: none;">
+        <p>ユーザー名: <span id="selectedUserNameDisplay"></span></p>
         <p id="wordDisplay">ここに単語が表示されます。</p>
-        <p id="romajiDisplay">ローマ字が表示されます。</p>
+        <!-- <p id="romajiDisplay">ローマ字が表示されます。</p> -->
         <input type="text" id="userInput" oninput="checkWord()">
-        <p id="result">結果: <span id="score">0</span> タイプ</p>
+        <!-- <p id="result">結果: <span id="score">0</span> タイプ</p> -->
         <button onclick="endGame()">ゲーム中断</button>
     </div>
 

@@ -1,3 +1,9 @@
+//////////////////////////
+// 変数定義
+//////////////////////////
+
+let selectedUserName = '';  // ログイン中のユーザー名
+
 
 // window.locationを使用して現在のホストとポート番号を取得
 const host = window.location.hostname || '127.0.0.1';
@@ -38,55 +44,21 @@ function goBackToHome() {
     hideRegistrationScreen();
 }
 
-// ホーム画面に登録済みのユーザー名を表示するために取得
-// function displayMemos() {
-//     fetch(url+'/get_user_names')
-//     .then(response => response.json())
-//     .then(data => {
-//         memosList.innerHTML = '';
-//         data.forEach(memo => {
-//             const listItem = document.createElement('li');
-//             listItem.textContent = `ID: ${memo.id}, Tag: ${memo.tag}, Sentence: ${memo.sentence}, Date: ${memo.date}`;
-//             memosList.appendChild(listItem);
-//         });
-//     })
-//     .catch(error => console.error('Error fetching memos:', error));
-// }
+// ホーム画面 → ゲーム画面
+function showGameScreen() {
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'block';
+}
 
-
-// ユーザ名を取得する関数
-function getUserNamesFromServer() {
-    // XMLHttpRequestオブジェクトを作成
-    var xhr = new XMLHttpRequest();
-
-    // GETリクエストを発行
-    xhr.open('GET', url+'/get_user_names', true);
-
-    // レスポンスが返ってきた時の処理
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            // サーバーから取得したデータをJSON形式からJavaScriptオブジェクトに変換
-            var response = JSON.parse(xhr.responseText);
-
-            // ユーザーリストを取得してプルダウンリストに表示
-            var userSelect = document.getElementById("userSelect");
-            userSelect.innerHTML = '<option value="">選択してください</option>'; // 初期オプションを追加
-            response.forEach(function (user) {
-                var option = document.createElement("option");
-                option.value = user;
-                option.text = user;
-                userSelect.appendChild(option);
-            });
-        }
-    };
-
-    // リクエストを送信
-    xhr.send();
+// ゲーム画面 → ホーム画面
+function hideGameScreen() {
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('homeScreen').style.display = 'block';
 }
 
 
 ////////////////////////
-// ユーザー登録関連
+// ユーザー関連
 ////////////////////////
 // ユーザー登録関数
 function registerUser() {
@@ -117,18 +89,82 @@ function clearusernameInput() {
     document.getElementById('usernameInput').value = '';
 }
 
+// 登録済みのユーザ名を取得する関数
+function getUserNamesFromServer() {
+    // XMLHttpRequestオブジェクトを作成
+    var xhr = new XMLHttpRequest();
 
+    // GETリクエストを発行
+    xhr.open('GET', url+'/get_user_names', true);
+
+    // レスポンスが返ってきた時の処理
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            // サーバーから取得したデータをJSON形式からJavaScriptオブジェクトに変換
+            var response = JSON.parse(xhr.responseText);
+
+            // ユーザーリストを取得してプルダウンリストに表示
+            var userSelect = document.getElementById("userSelect");
+            userSelect.innerHTML = '<option value="">選択してください</option>'; // 初期オプションを追加
+            response.forEach(function (user) {
+                var option = document.createElement("option");
+                option.value = user;
+                option.text = user;
+                userSelect.appendChild(option);
+            });
+        }
+    };
+
+    // リクエストを送信
+    xhr.send();
+}
+
+// ログインしたユーザ名を取得する関数
+function getSelectedUserName() {
+    // ドロップダウンから選択されたユーザー名を取得
+    const userSelect = document.getElementById("userSelect");
+    selectedUserName = userSelect.value;
+
+    // ゲームを開始する前にユーザーが選択されているかを確認
+    if (selectedUserName === '') {
+        alert("ユーザーを選択してください。");
+        return;
+    }
+}
 
 /////////////////////
 // ゲーム関連
 /////////////////////
 
-// ランダムにワードを取得する
-async function getRandomWord() {
-    const response = await fetch(url+'/get_random_word');
-    const data = await response.json();
-    return data.word;
+// ゲームスタート
+function startGame() {
+    getSelectedUserName();
+    document.getElementById('selectedUserNameDisplay').textContent = selectedUserName;
+    // fetchWords();
+    // currentIndex = 0;
+    // score = 0;
+    // displayWord();
+    document.getElementById('userInput').value = '';
+    showGameScreen();
+    setTimeout(() => {
+        endGame();
+    }, 180000); // 3分後にゲーム終了
 }
+
+// ゲーム終了
+function endGame() {
+    document.getElementById('result').textContent = `結果: ${score} タイプ`;
+    hideGameScreen();
+    // サーバーにスコアを送信する関数（バックエンドとの通信）
+    // ここではサンプルとして送信しないで表示のみ行います
+}
+
+// ランダムにワードを取得する
+// async function getRandomWord() {
+//     const response = await fetch(url+'/get_random_word');
+//     const data = await response.json();
+//     return data.word;
+// }
 
 // // 次の単語ランダム取得関数から取り出して表示関数にいれる
 // async function nextWord() {
@@ -158,67 +194,39 @@ async function getRandomWord() {
 //     console.log(data.message);
 // }
 
-let words = [];
-let currentIndex = 0;
-let score = 0;
+// let words = [];
+// let currentIndex = 0;
+// let score = 0;
 
 // サーバーから単語を全部取得する関数
-function fetchWords() {
-    // サーバーから単語を取得する関数（バックエンドとの通信）
-    // getRandomWord()
-    // ここではサンプルとして固定の単語リストを使用します
-    words = ['こんにちは', 'ありがとう', 'さようなら', 'おはよう', 'おやすみ'];
-}
+// function fetchWords() {
+//     // サーバーから単語を取得する関数（バックエンドとの通信）
+//     // getRandomWord()
+//     // ここではサンプルとして固定の単語リストを使用します
+//     words = ['こんにちは', 'ありがとう', 'さようなら', 'おはよう', 'おやすみ'];
+// }
 
 // 単語表示関数
-function displayWord() {
-    document.getElementById('wordDisplay').textContent = words[currentIndex];
-    // ここで対応するローマ字も表示する処理を追加
-}
+// function displayWord() {
+//     document.getElementById('wordDisplay').textContent = words[currentIndex];
+//     // ここで対応するローマ字も表示する処理を追加
+// }
 
 // 入力されたローマ字をチェック
-function checkWord() {
-    const userInput = document.getElementById('userInput').value.trim().toLowerCase();
-    const currentWord = words[currentIndex].toLowerCase();
+// function checkWord() {
+//     const userInput = document.getElementById('userInput').value.trim().toLowerCase();
+//     const currentWord = words[currentIndex].toLowerCase();
 
-    if (userInput === currentWord) {
-        score++;
-        document.getElementById('score').textContent = score;
-        currentIndex++;
+//     if (userInput === currentWord) {
+//         score++;
+//         document.getElementById('score').textContent = score;
+//         currentIndex++;
 
-        if (currentIndex < words.length) {
-            displayWord();
-            document.getElementById('userInput').value = '';
-        } else {
-            endGame();
-        }
-    }
-}
-
-// ゲームスタート
-function startGame() {
-    fetchWords();
-    currentIndex = 0;
-    score = 0;
-    displayWord();
-    document.getElementById('userInput').value = '';
-    document.getElementById('homeScreen').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'block';
-
-    setTimeout(() => {
-        endGame();
-    }, 180000); // 3分後にゲーム終了
-}
-
-// ゲーム終了
-function endGame() {
-    document.getElementById('result').textContent = `結果: ${score} タイプ`;
-    document.getElementById('homeScreen').style.display = 'block';
-    document.getElementById('gameScreen').style.display = 'none';
-    // サーバーにスコアを送信する関数（バックエンドとの通信）
-    // ここではサンプルとして送信しないで表示のみ行います
-}
-
-
-
-
+//         if (currentIndex < words.length) {
+//             displayWord();
+//             document.getElementById('userInput').value = '';
+//         } else {
+//             endGame();
+//         }
+//     }
+// }
