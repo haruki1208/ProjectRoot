@@ -8,10 +8,15 @@
 
     <!-- ホーム画面 -->
     <div id="homeScreen">
-        <label for="userSelect">ユーザー:</label>
-        <select id="userSelect">
+        <label for="selectUser">ユーザー:</label>
+        <select id="selectUser">
             <option value="">選択してください</option>
             <!-- サーバーから取得したユーザーリストをここに表示 -->
+        </select>
+        <label for="selectGenre">ジャンル:</label>
+        <select id="selectGenre">
+            <option value="">選択してください</option>
+            <!-- サーバーから取得したジャンルリストをここに表示 -->
         </select>
         <button onclick="startGame()">ゲームスタート</button>
         <button onclick="showRegistrationScreen()">ユーザー登録</button>
@@ -20,6 +25,7 @@
     <!-- ゲーム画面 -->
     <div id="gameScreen" style="display: none;">
         <p>ユーザー名: <span id="selectedUserNameDisplay"></span></p>
+        <p>ジャンル: <span id="selectedGenreNameDisplay"></span></p>
         <p id="wordDisplay">ここに単語が表示されます。</p>
         <!-- <p id="romajiDisplay">ローマ字が表示されます。</p> -->
         <input type="text" id="userInput" oninput="checkWord()">
