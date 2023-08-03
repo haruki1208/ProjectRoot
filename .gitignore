@@ -2,4 +2,4 @@
 **/database
 
 # Pythonのコンパイル済みバイトコード
-**/*.pyc
+*.pyc
