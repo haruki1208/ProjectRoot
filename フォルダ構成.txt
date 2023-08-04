@@ -1,3 +1,4 @@
+cd ~/OneDrive/ドキュメント/ProjectRoot/
 ProjectRoot/
     ├── chatgpt_qa_app/
     |     ├── app.py
