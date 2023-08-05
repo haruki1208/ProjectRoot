@@ -156,10 +156,12 @@ function startGame() {
     }
     document.getElementById('selectedGenreNameDisplay').textContent = selectedGenreName;
     clearInput('userInput');
-    // ここで選択したジャンルの単語を取得する
-    getWordsFromGenre(selectedGenreName);
-    // 次にランダムで一単語取得して表示する
     showGameScreen();
+    // ここで選択したジャンルの単語を取得する
+    getWordsFromGenre(selectedGenreName, function(words) {
+        // ゲームスタート時に単語リストを取得して、ゲームを開始
+        playGame(words);
+    });
     setTimeout(() => {
         endGame();
     }, 180000); // 3分後にゲーム終了
@@ -171,10 +173,8 @@ function endGame() {
     // サーバーにスコアを送信する関数（バックエンドとの通信）
 }
 
-// script.js
-
 // 選択したジャンルの単語を取得して表示する
-function getWordsFromGenre(selectedGenreName) {
+function getWordsFromGenre(selectedGenreName, callback) {
     // サーバーにジャンル名を送信するリクエスト
     fetch(url+'/get_words', {
         method: 'POST',
@@ -184,95 +184,46 @@ function getWordsFromGenre(selectedGenreName) {
         body: JSON.stringify({ "selectedGenreName": selectedGenreName })
     })
     .then(response => response.json())
-    .then(data => displayWords(data.words))
+    .then(data => callback(data.words))
     .catch(error => console.error('Error:', error));
 }
 
-// 取得した単語をランダムに表示する
-function displayWords(words) {
+// ゲームをプレイする
+function playGame(words) {
     const wordDisplay = document.getElementById('wordDisplay');
-    wordDisplay.innerHTML = ''; // 一度表示をクリア
+    const userInput = document.getElementById('userInput');
+    let userScore = 0;
 
-    if (words.length === 0) {
-        wordDisplay.innerText = 'No words found for the selected genre.';
-        return;
+    function displayNextWord() {
+        if (words.length === 0) {
+            // ゲーム終了
+            endGame();
+            return;
+        }
+
+        // ランダムに単語を表示
+        const randomIndex = Math.floor(Math.random() * words.length);
+        const randomWord = words[randomIndex];
+
+        wordDisplay.innerText = randomWord;
+        // 一回出た単語はもう出ないようにする
+        words.splice(randomIndex, 1);
+
+        // ユーザーの入力をチェック
+        userInput.oninput = checkWord;
     }
 
-    // ランダムに単語を表示
-    const randomIndex = Math.floor(Math.random() * words.length);
-    const randomWord = words[randomIndex];
-    wordDisplay.innerText = randomWord;
+    // ユーザーの入力をチェック
+    function checkWord() {
+        const currentWord = wordDisplay.innerText.trim().toLowerCase();
+        const inputWord = userInput.value.trim().toLowerCase();
+        if (inputWord === currentWord) {
+            userScore++;
+            displayNextWord();
+            userInput.value = ''; // 入力欄をクリア
+        }
+    }
+
+    // 最初の単語を表示
+    displayNextWord();
 }
-
-
-// ランダムにワードを取得する
-// async function getRandomWord() {
-//     const response = await fetch(url+'/get_random_word');
-//     const data = await response.json();
-//     return data.word;
-// }
-
-// // 次の単語ランダム取得関数から取り出して表示関数にいれる
-// async function nextWord() {
-//     const word = await getRandomWord();
-//     updateWordDisplay(word);
-// }
-
-// // ゲーム終了関数
-// function endGame() {
-//     clearInterval(timer);
-//     gameRunning = false;
-//     const userTyped = userInput.value.length;
-//     saveGameResult(userTyped);
-//     alert('ゲーム終了！あなたのタイピング数：' + userTyped);
-// }
-
-// // タイピング数をカウント
-// async function saveGameResult(typedCount) {
-//     const response = await fetch(url+'/save_game_result', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json'
-//         },
-//         body: JSON.stringify({ count: typedCount })
-//     });
-//     const data = await response.json();
-//     console.log(data.message);
-// }
-
-// let words = [];
-// let currentIndex = 0;
-// let score = 0;
-
-// サーバーから単語を全部取得する関数
-// function fetchWords() {
-//     // サーバーから単語を取得する関数（バックエンドとの通信）
-//     // getRandomWord()
-//     // ここではサンプルとして固定の単語リストを使用します
-//     words = ['こんにちは', 'ありがとう', 'さようなら', 'おはよう', 'おやすみ'];
-// }
-
-// 単語表示関数
-// function displayWord() {
-//     document.getElementById('wordDisplay').textContent = words[currentIndex];
-//     // ここで対応するローマ字も表示する処理を追加
-// }
-
-// 入力されたローマ字をチェック
-// function checkWord() {
-//     const userInput = document.getElementById('userInput').value.trim().toLowerCase();
-//     const currentWord = words[currentIndex].toLowerCase();
-
-//     if (userInput === currentWord) {
-//         score++;
-//         document.getElementById('score').textContent = score;
-//         currentIndex++;
-
-//         if (currentIndex < words.length) {
-//             displayWord();
-//             document.getElementById('userInput').value = '';
-//         } else {
-//             endGame();
-//         }
-//     }
-// }
