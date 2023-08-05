@@ -8,15 +8,11 @@
 
     <!-- ホーム画面 -->
     <div id="homeScreen">
-        <label for="selectUser">ユーザー:</label>
+        <label>ユーザー:</label> <!-- for="selectUser" -->
         <select id="selectUser">
-            <option value="">選択してください</option>
-            <!-- サーバーから取得したユーザーリストをここに表示 -->
         </select>
-        <label for="selectGenre">ジャンル:</label>
+        <label>ジャンル:</label>
         <select id="selectGenre">
-            <option value="">選択してください</option>
-            <!-- サーバーから取得したジャンルリストをここに表示 -->
         </select>
         <button onclick="startGame()">ゲームスタート</button>
         <button onclick="showRegistrationScreen()">ユーザー登録</button>
@@ -44,3 +40,22 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+<!-- index.html -->
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Word Display</title>
+</head>
+<body>
+    <h1>Word Display</h1>
+    <label for="genreSelect">Select Genre:</label>
+    <select id="genreSelect">
+        <option value="料理">料理</option>
+        他のジャンルのオプションを追加
+    </select>
+    <button id="getWordsButton">Get Words</button>
+    <div id="wordDisplay"></div>
+    <script src="script.js"></script>
+</body>
+</html> -->

@@ -5,6 +5,9 @@
 let selectedUserName = '';      // ログイン中のユーザー名
 let selectedGenreName = '';     // 選択中のジャンル名
 
+/////////////////////////
+// 汎用
+/////////////////////////
 
 // window.locationを使用して現在のホストとポート番号を取得
 const host = window.location.hostname || '127.0.0.1';
@@ -17,6 +20,25 @@ const url = `http://${host}:${port}`;
 window.addEventListener('unload', function() {
     navigator.sendBeacon(url+'/close', '');
 });
+
+// 入力欄をクリアする
+function clearInput(inputId) {
+    document.getElementById(inputId).value = '';
+}
+
+// 画面から値を取得する関数
+function getSelectedValue(selectElement, message) {
+    const selectUser = document.getElementById(selectElement);
+    const selectedValue = selectUser.value;
+
+    // ゲームを開始する前に値が選択されているかを確認
+    if (selectedValue === '') {
+        alert(message);
+        return;
+    }
+
+    return selectedValue;
+}
 
 /////////////////////////
 // 画面関連
@@ -32,7 +54,7 @@ function showRegistrationScreen() {
 function hideRegistrationScreen() {
     document.getElementById('registrationScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
-    getUserNamesFromServer();
+    getDataFromServer('/get_user_names',selectUser);
 }
 
 // 登録せずにホーム画面に戻る
@@ -52,17 +74,16 @@ function hideGameScreen() {
     document.getElementById('homeScreen').style.display = 'block';
 }
 
-
 ////////////////////////
 // ユーザー関連
 ////////////////////////
-// 登録済みのユーザ名を取得する関数
-function getUserNamesFromServer() {
+// サーバーからデータを取得しプルダウンリストに表示する関数
+function getDataFromServer(endpoint, selectElement) {
     // XMLHttpRequestオブジェクトを作成
     var xhr = new XMLHttpRequest();
 
     // GETリクエストを発行
-    xhr.open('GET', url+'/get_user_names', true);
+    xhr.open('GET', url + endpoint, true);
 
     // レスポンスが返ってきた時の処理
     xhr.onload = function () {
@@ -70,14 +91,13 @@ function getUserNamesFromServer() {
             // サーバーから取得したデータをJSON形式からJavaScriptオブジェクトに変換
             var response = JSON.parse(xhr.responseText);
 
-            // ユーザーリストを取得してプルダウンリストに表示
-            var selectUser = document.getElementById("selectUser");
-            selectUser.innerHTML = '<option value="">選択してください</option>'; // 初期オプションを追加
-            response.forEach(function (user) {
+            // プルダウンリストに表示
+            selectElement.innerHTML = '<option value="">選択してください</option>'; // 初期オプションを追加
+            response.forEach(function (item) {
                 var option = document.createElement("option");
-                option.value = user;
-                option.text = user;
-                selectUser.appendChild(option);
+                option.value = item;
+                option.text = item;
+                selectElement.appendChild(option);
             });
         }
     };
@@ -85,40 +105,12 @@ function getUserNamesFromServer() {
     // リクエストを送信
     xhr.send();
 }
-// 登録済みのジャンル名を取得する関数
-function getGenreNamesFromServer() {
-    // XMLHttpRequestオブジェクトを作成
-    var xhr = new XMLHttpRequest();
 
-    // GETリクエストを発行
-    xhr.open('GET', url+'/get_genre_names', true);
-
-    // レスポンスが返ってきた時の処理
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            // サーバーから取得したデータをJSON形式からJavaScriptオブジェクトに変換
-            var response = JSON.parse(xhr.responseText);
-
-            // ユーザーリストを取得してプルダウンリストに表示
-            var selectGenre = document.getElementById("selectGenre");
-            selectGenre.innerHTML = '<option value="">選択してください</option>'; // 初期オプションを追加
-            response.forEach(function (genre) {
-                var option = document.createElement("option");
-                option.value = genre;
-                option.text = genre;
-                selectGenre.appendChild(option);
-            });
-        }
-    };
-
-    // リクエストを送信
-    xhr.send();
-}
 
 // ページが読み込まれた際
 window.onload = function() {
-    getUserNamesFromServer();   // ユーザー名を取得する関数を実行
-    getGenreNamesFromServer();  // ジャンルを取得する関数を実行
+    getDataFromServer('/get_user_names',selectUser);    // ユーザー名を取得する関数を実行
+    getDataFromServer('/get_genre_names',selectGenre);  // ジャンルを取得する関数を実行
 };
 
 // ユーザー登録関数
@@ -136,43 +128,12 @@ function registerUser() {
         .then(response => response.json())
         .then(data => {
             console.log(data.username);
-            clearusernameInput();
+            clearInput('usernameInput');
             // ユーザー登録が完了したら、ホーム画面に戻る
             hideRegistrationScreen();
         });
     } else {
         alert('ユーザー名を入力してください。');
-    }
-}
-
-// ユーザ名入力欄をクリアする
-function clearusernameInput() {
-    document.getElementById('usernameInput').value = '';
-}
-
-// ログインしたユーザ名を取得する関数
-function getSelectedUserName() {
-    // ドロップダウンから選択されたユーザー名を取得
-    const selectUser = document.getElementById("selectUser");
-    selectedUserName = selectUser.value;
-
-    // ゲームを開始する前にユーザーが選択されているかを確認
-    if (selectedUserName === '') {
-        alert("ユーザーを選択してください。");
-        return;
-    }
-}
-
-// 選択したジャンル名を取得する関数
-function getSelectedGenreName() {
-    // ドロップダウンから選択されたジャンル名を取得
-    const selectGenre = document.getElementById("selectGenre");
-    selectedGenreName = selectGenre.value;
-
-    // ゲームを開始する前にジャンルが選択されているかを確認
-    if (selectedGenreName === '') {
-        alert("ジャンルを選択してください。");
-        return;
     }
 }
 
@@ -182,23 +143,22 @@ function getSelectedGenreName() {
 
 // ゲームスタート
 function startGame() {
-    getSelectedUserName();      // ログインしたユーザ名取得
+    const selectedUserName = getSelectedValue("selectUser","ユーザーを選択してください。");
     // ユーザーが選択されていない場合、ゲーム画面への遷移を中止
     if (!selectedUserName) {
         return; // 選択されていない場合、ここで処理を終了
     }
     document.getElementById('selectedUserNameDisplay').textContent = selectedUserName;
-    getSelectedGenreName();     // 選択したジャンル名取得
+    const selectedGenreName = getSelectedValue("selectGenre","ジャンルを選択してください。");
     // ジャンルが選択されていない場合、ゲーム画面への遷移を中止
     if (!selectedGenreName) {
         return; // 選択されていない場合、ここで処理を終了
     }
     document.getElementById('selectedGenreNameDisplay').textContent = selectedGenreName;
-    // fetchWords();
-    // currentIndex = 0;
-    // score = 0;
-    // displayWord();
-    document.getElementById('userInput').value = '';
+    clearInput('userInput');
+    // ここで選択したジャンルの単語を取得する
+    getWordsFromGenre(selectedGenreName);
+    // 次にランダムで一単語取得して表示する
     showGameScreen();
     setTimeout(() => {
         endGame();
@@ -207,11 +167,43 @@ function startGame() {
 
 // ゲーム終了
 function endGame() {
-    // document.getElementById('result').textContent = `結果: ${score} タイプ`;
     hideGameScreen();
     // サーバーにスコアを送信する関数（バックエンドとの通信）
-    // ここではサンプルとして送信しないで表示のみ行います
 }
+
+// script.js
+
+// 選択したジャンルの単語を取得して表示する
+function getWordsFromGenre(selectedGenreName) {
+    // サーバーにジャンル名を送信するリクエスト
+    fetch(url+'/get_words', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "selectedGenreName": selectedGenreName })
+    })
+    .then(response => response.json())
+    .then(data => displayWords(data.words))
+    .catch(error => console.error('Error:', error));
+}
+
+// 取得した単語をランダムに表示する
+function displayWords(words) {
+    const wordDisplay = document.getElementById('wordDisplay');
+    wordDisplay.innerHTML = ''; // 一度表示をクリア
+
+    if (words.length === 0) {
+        wordDisplay.innerText = 'No words found for the selected genre.';
+        return;
+    }
+
+    // ランダムに単語を表示
+    const randomIndex = Math.floor(Math.random() * words.length);
+    const randomWord = words[randomIndex];
+    wordDisplay.innerText = randomWord;
+}
+
 
 // ランダムにワードを取得する
 // async function getRandomWord() {

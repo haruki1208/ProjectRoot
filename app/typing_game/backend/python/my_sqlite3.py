@@ -10,10 +10,10 @@ cursor = conn.cursor()
 
 # SQLクエリを実行
 # クリエイトテーブル
-# cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-#                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-#                     username TEXT NOT NULL UNIQUE
-#                 )''')
+cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT NOT NULL UNIQUE
+                )''')
 cursor.execute('''CREATE TABLE IF NOT EXISTS typing_words (
                     id INTEGER,
                     genre TEXT NOT NULL,
