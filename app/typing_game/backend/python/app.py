@@ -2,6 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
+import pdb
 
 app = Flask(__name__)
 CORS(app)  # すべてのリクエストに対してCORSを有効にする
@@ -31,19 +32,19 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL UNIQUE
                 )''')
-# スコアテーブル
-cursor.execute('''CREATE TABLE IF NOT EXISTS game_results (
-                    id INTEGER PRIMARY KEY,
-                    user_id INTEGER,
-                    count INTEGER,
-                    FOREIGN KEY (user_id) REFERENCES users (id)
-                )''')
 # タイピング単語テーブル
 cursor.execute('''CREATE TABLE IF NOT EXISTS typing_words (
                     id INTEGER,
                     genre TEXT NOT NULL,
                     word TEXT,
                     PRIMARY KEY (id, genre)
+                )''')
+# スコアテーブル
+cursor.execute('''CREATE TABLE IF NOT EXISTS game_results (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    score INTEGER,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
                 )''')
 conn.commit()
 
@@ -76,27 +77,30 @@ def execute_select_sql(sql_select_query):
 def execute_insert_sql(table_name, columns, values):
     try:
         # SQLiteデータベースに接続
-        conn = sqlite3.connect(db_file)
-        cursor = conn.cursor()
+        with sqlite3.connect(db_file) as conn:
+            # コネクションを作成した際にカーソルも作成される
+            # withブロックを抜けると自動的にカーソルとコネクションがクローズされる
 
-        # 使用例
-        # table_name = "my_table"  # INSERTするテーブル名を指定
-        # columns = ["column1", "column2", "column3"]  # INSERTするカラム名を指定
-        # values = ["value1", "value2", "value3"]  # INSERTする値を指定
-        # INSERT文を作成
-        columns_str = ', '.join(columns)
-        values_placeholder = ', '.join(['?'] * len(values))
-        sql_query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({values_placeholder})"
+            # INSERT文を作成
+            columns_str = ', '.join(columns)
+            print('columns_str:',columns_str)
+            values_placeholder = ', '.join(['?'] * len(values))
+            print('values_placeholder:',values_placeholder)
+            sql_query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({values_placeholder})"
+            print('values:',values)
+            # print('tuple([values]):',tuple([values]))
 
-        # SQL文を実行
-        cursor.execute(sql_query, values)
-        conn.commit()   # コミット
-        conn.close()    # クローズ
+            # SQL文を実行
+            conn.execute(sql_query, values) 
+            conn.commit()  # コミット
 
-        return cursor.lastrowid
+            # # 最後に挿入された行のIDを取得
+            # last_inserted_id = conn.lastrowid
+            # return last_inserted_id
+            return None
 
     except sqlite3.Error as e:
-        print("Error executing SQL:", e)
+        print("Error insert SQL:", e)
         return None
 
 # デリート文を実行する関数
@@ -140,6 +144,20 @@ def get_user_names():
     # JSON形式でクライアントにデータを返す
     return jsonify(user_names)
 
+# ユーザー名からidを取得する
+@app.route('/get_id', methods=['POST'])
+def get_id():
+        try:
+            data = request.get_json()
+            username = data['username']
+            sql_select_query = f"SELECT id FROM users WHERE username = '{username}'"
+            id = execute_select_sql(sql_select_query)   # idを取得
+            # JSON形式でクライアントにデータを返す
+            return jsonify({'userId': id}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)})
+
+
 # ジャンル名取得 ゲーム開始時に選択するため
 @app.route('/get_genre_names', methods=['GET'])
 def get_genre_names():
@@ -159,8 +177,32 @@ def get_words():
         return jsonify(response)
     except Exception as e:
         return jsonify({'error': str(e)})
+    
+# ゲーム結果をデータベースに保存するAPI
+@app.route('/save_score', methods=['POST'])
+def save_score():
+    # pdb.set_trace()
+    data = request.get_json()
+    user_id = data.get('user_id')
+    score = data.get('score')
+    print('user_id',user_id[0][0])
+    print('score',score)
+
+    if user_id is None or score is None:
+        return jsonify({'message': 'User ID and score are required.'}), 400
+
+    try:
+        table_name = "game_results"    # INSERTするテーブル名を指定
+        columns = ["user_id","score"]  # INSERTするカラム名を指定
+        values = [user_id[0][0], score]     # INSERTする値を指定
+        execute_insert_sql(table_name, columns, values)
+        return jsonify({'message': 'Score saved successfully.'}), 200
+    except Exception as e:
+        return jsonify({'message': 'Failed to save score.', 'error': str(e)}), 500
+
 
 
 if __name__ == '__main__':
-    app.run()
+    # app.run()
+    app.run(debug=True)
     

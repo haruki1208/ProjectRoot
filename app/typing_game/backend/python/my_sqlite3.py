@@ -20,6 +20,13 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS typing_words (
                     word TEXT,
                     PRIMARY KEY (id, genre)
                 )''')
+# スコアテーブル
+cursor.execute('''CREATE TABLE IF NOT EXISTS game_results (
+                    id INTEGER PRIMARY KEY,
+                    user_id INTEGER,
+                    score INTEGER,
+                    FOREIGN KEY (user_id) REFERENCES users (id)
+                )''')
 
 # インサート
 # cursor.execute('''INSERT INTO users (username)
@@ -91,6 +98,9 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS typing_words (
 #                  ''')
 # cursor.execute('''DROP TABLE typing_words
 #                  ''')
+# cursor.execute('''DROP TABLE game_results
+#                  ''')
+
 
 # セレクト
 print("ユーザー")
@@ -100,8 +110,15 @@ rows = cursor.fetchall()
 for row in rows:
     print(row)
 
-print("タイピングワード")
-cursor.execute('''SELECT * FROM typing_words
+# print("タイピングワード")
+# cursor.execute('''SELECT * FROM typing_words
+#                 ''')
+# rows = cursor.fetchall()
+# for row in rows:
+#     print(row)
+    
+print("スコア")
+cursor.execute('''SELECT * FROM game_results
                 ''')
 rows = cursor.fetchall()
 for row in rows:

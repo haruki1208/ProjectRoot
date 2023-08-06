@@ -4,6 +4,8 @@
 
 let selectedUserName = '';      // ログイン中のユーザー名
 let selectedGenreName = '';     // 選択中のジャンル名
+let userScore = 0;              // スコア
+
 
 /////////////////////////
 // 汎用
@@ -137,13 +139,41 @@ function registerUser() {
     }
 }
 
+// ユーザー名からidを取得する関数
+async function getIdFromUser() {
+    if (selectedUserName !== '') {
+        try {
+            const response = await fetch(url + '/get_id', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "username": selectedUserName }) // ユーザー名をオブジェクトとして送信
+            });
+            
+            const data = await response.json();
+            const userId = data.userId;
+            console.log('userId:' + data.userId);
+            return userId;
+        } catch (error) {
+            console.error('エラーが発生しました:', error);
+            // エラーハンドリングを行うか、適切な値を返す必要がある
+        }
+    } else {
+        alert('選択されたユーザー名が登録されていません。');
+        // エラーハンドリングを行うか、適切な値を返す必要がある
+    }
+}
+
+
 /////////////////////
 // ゲーム関連
 /////////////////////
 
 // ゲームスタート
 function startGame() {
-    const selectedUserName = getSelectedValue("selectUser","ユーザーを選択してください。");
+    selectedUserName = getSelectedValue("selectUser","ユーザーを選択してください。");
+    console.log('username:'+selectedUserName);
     // ユーザーが選択されていない場合、ゲーム画面への遷移を中止
     if (!selectedUserName) {
         return; // 選択されていない場合、ここで処理を終了
@@ -164,13 +194,16 @@ function startGame() {
     });
     setTimeout(() => {
         endGame();
-    }, 180000); // 3分後にゲーム終了
+    }, 20000); // 10秒後にゲーム終了
+    // }, 180000); // 3分後にゲーム終了
 }
 
 // ゲーム終了
 function endGame() {
+    // ユーザーのスコアをサーバーに送信
+    console.log('userScore:'+userScore);
+    saveUserScoreToServer(userScore);
     hideGameScreen();
-    // サーバーにスコアを送信する関数（バックエンドとの通信）
 }
 
 // 選択したジャンルの単語を取得して表示する
@@ -188,11 +221,41 @@ function getWordsFromGenre(selectedGenreName, callback) {
     .catch(error => console.error('Error:', error));
 }
 
+// サーバーにユーザーのスコアを送信する関数
+async function saveUserScoreToServer(score) {
+    try {
+        const userId = await getIdFromUser(); // getIdFromUser関数が非同期関数になったことに注意
+
+        console.log('username:' + selectedUserName);
+        console.log('userId:' + userId);
+        console.log('score:' + score);
+
+        const data = {
+            user_id: userId,
+            score: score
+        };
+
+        const response = await fetch(url + '/save_score', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const responseData = await response.json();
+        // サーバーからのレスポンスを処理
+        // alert(responseData.message);
+        console.log(responseData.message); // メッセージを表示（必要に応じてアラートや別の表示方法に変更）
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 // ゲームをプレイする
 function playGame(words) {
     const wordDisplay = document.getElementById('wordDisplay');
     const userInput = document.getElementById('userInput');
-    let userScore = 0;
 
     function displayNextWord() {
         if (words.length === 0) {
@@ -219,6 +282,7 @@ function playGame(words) {
         const inputWord = userInput.value.trim().toLowerCase();
         if (inputWord === currentWord) {
             userScore++;
+            console.log('userScore:'+userScore)
             displayNextWord();
             userInput.value = ''; // 入力欄をクリア
         }
