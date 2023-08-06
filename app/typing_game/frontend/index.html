@@ -21,14 +21,14 @@
     <p>ユーザー名: <span id="selectedUserNameDisplay"></span></p>
     <p>ジャンル: <span id="selectedGenreNameDisplay"></span></p>
     <p id="wordDisplay">ここに単語が表示されます。</p>
-    <input type="text" id="userInput">
+    <input type="text" id="userInput" autocomplete="off">
     <button onclick="endGame()">ゲーム中断</button>
 </div>
 
     <!-- ユーザー登録画面 -->
     <div id="registrationScreen" style="display: none;">
         <label for="usernameInput">ユーザー名:</label>
-        <input type="text" id="usernameInput">
+        <input type="text" id="usernameInput" autocomplete="off">
         <button onclick="registerUser()">登録</button>
         <button onclick="goBackToHome()">戻る</button>
     </div>

@@ -5,6 +5,7 @@
 let selectedUserName = '';      // ログイン中のユーザー名
 let selectedGenreName = '';     // 選択中のジャンル名
 let userScore = 0;              // スコア
+let endGameTimer = 0;           // 終了までの時間
 
 
 /////////////////////////
@@ -117,7 +118,9 @@ window.onload = function() {
 
 // ユーザー登録関数
 function registerUser() {
-    const username = document.getElementById('usernameInput').value.trim();
+    const usernameInput = document.getElementById('usernameInput');
+    const username = usernameInput.value.trim();
+    
     if (username !== '') {
         // サーバーにユーザー名を送信するリクエスト
         fetch(url+'/register', {
@@ -129,10 +132,17 @@ function registerUser() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data.username);
-            clearInput('usernameInput');
-            // ユーザー登録が完了したら、ホーム画面に戻る
-            hideRegistrationScreen();
+            if (data.message === "ユーザー登録が完了しました。") {
+                clearInput('usernameInput');
+                alert('ユーザー名「'+data.username+'」を登録しました。');
+                // ユーザー登録が完了したら、ホーム画面に戻る
+                hideRegistrationScreen();
+            } else if (data.message === "そのユーザー名は既に存在します。") {
+                alert('「'+username+'」は既に登録されています。');
+                clearInput('usernameInput');
+            } else {
+                alert('エラーが発生しました。');
+            }
         });
     } else {
         alert('ユーザー名を入力してください。');
@@ -192,10 +202,11 @@ function startGame() {
         // ゲームスタート時に単語リストを取得して、ゲームを開始
         playGame(words);
     });
-    setTimeout(() => {
+    // ゲーム終了の自動タイマーをセット
+    endGameTimer = setTimeout(() => {
         endGame();
-    }, 20000); // 10秒後にゲーム終了
-    // }, 180000); // 3分後にゲーム終了
+    // }, 20000); // 20秒後にゲーム終了
+    }, 180000); // 3分後にゲーム終了
 }
 
 // ゲーム終了
@@ -203,7 +214,10 @@ function endGame() {
     // ユーザーのスコアをサーバーに送信
     console.log('userScore:'+userScore);
     saveUserScoreToServer(userScore);
+    alert(selectedUserName+'さんのスコアは '+userScore+'です')
     hideGameScreen();
+    // タイマーをクリアして、自動終了を防ぐ
+    clearTimeout(endGameTimer);
 }
 
 // 選択したジャンルの単語を取得して表示する
@@ -245,7 +259,6 @@ async function saveUserScoreToServer(score) {
 
         const responseData = await response.json();
         // サーバーからのレスポンスを処理
-        // alert(responseData.message);
         console.log(responseData.message); // メッセージを表示（必要に応じてアラートや別の表示方法に変更）
     } catch (error) {
         console.error('Error:', error);
@@ -282,9 +295,8 @@ function playGame(words) {
         const inputWord = userInput.value.trim().toLowerCase();
         if (inputWord === currentWord) {
             userScore++;
-            console.log('userScore:'+userScore)
-            displayNextWord();
             userInput.value = ''; // 入力欄をクリア
+            displayNextWord();
         }
     }
 

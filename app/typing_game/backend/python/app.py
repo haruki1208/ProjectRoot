@@ -88,7 +88,6 @@ def execute_insert_sql(table_name, columns, values):
             print('values_placeholder:',values_placeholder)
             sql_query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({values_placeholder})"
             print('values:',values)
-            # print('tuple([values]):',tuple([values]))
 
             # SQL文を実行
             conn.execute(sql_query, values) 
@@ -97,11 +96,11 @@ def execute_insert_sql(table_name, columns, values):
             # # 最後に挿入された行のIDを取得
             # last_inserted_id = conn.lastrowid
             # return last_inserted_id
-            return None
+            return 0
 
     except sqlite3.Error as e:
         print("Error insert SQL:", e)
-        return None
+        return 8
 
 # デリート文を実行する関数
 
@@ -124,14 +123,13 @@ def register():
     data = request.json # JSON形式のデータを取得
     username = data.get('username')
     if username:
-        try:
-            # insert_user(username)
-            table_name = "users"    # INSERTするテーブル名を指定
-            columns = ["username"]  # INSERTするカラム名を指定
-            values = [username]     # INSERTする値を指定
-            execute_insert_sql(table_name, columns, values)
+        table_name = "users"    # INSERTするテーブル名を指定
+        columns = ["username"]  # INSERTするカラム名を指定
+        values = [username]     # INSERTする値を指定
+        return_code = execute_insert_sql(table_name, columns, values)
+        if return_code == 0:
             return {"username": username, "message": "ユーザー登録が完了しました。"}
-        except sqlite3.IntegrityError:
+        else:
             return {"message": "そのユーザー名は既に存在します。"}, 409
     else:
         return {"message": "ユーザー名を入力してください。"}, 400
