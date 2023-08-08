@@ -196,17 +196,43 @@ function startGame() {
     }
     document.getElementById('selectedGenreNameDisplay').textContent = selectedGenreName;
     clearInput('userInput');
-    showGameScreen();
-    // ここで選択したジャンルの単語を取得する
-    getWordsFromGenre(selectedGenreName, function(words) {
-        // ゲームスタート時に単語リストを取得して、ゲームを開始
-        playGame(words);
+
+    startCountdown(3,function() {
+        document.getElementById('gameScreen').style.display = 'block';
+        // ここで選択したジャンルの単語を取得する
+        getWordsFromGenre(selectedGenreName, function(words) {
+            // ゲームスタート時に単語リストを取得して、ゲームを開始
+            playGame(words);
+        });
+        // ゲーム終了の自動タイマーをセット
+        endGameTimer = setTimeout(() => {
+            endGame();
+        // }, 20000); // 20秒後にゲーム終了
+        }, 180000); // 3分後にゲーム終了
     });
-    // ゲーム終了の自動タイマーをセット
-    endGameTimer = setTimeout(() => {
-        endGame();
-    // }, 20000); // 20秒後にゲーム終了
-    }, 180000); // 3分後にゲーム終了
+}
+
+// カウントダウン後に関数を呼び出す
+function startCountdown(second,callback) {
+    const countdownDisplay = document.getElementById('countdownDisplay');
+    document.getElementById('homeScreen').style.display = 'none';
+    countdownDisplay.style.display = 'block';
+    
+    let countdown = second; // カウントダウン秒数
+    countdownDisplay.textContent = countdown;
+    
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        countdownDisplay.textContent = countdown;
+        
+        if (countdown === 0) {
+            clearInterval(countdownInterval);
+            countdownDisplay.style.display = 'none'; // カウントダウン非表示
+            if (typeof callback === 'function') {
+                callback(); // カウントダウン後に指定されたコールバックを実行
+            }
+        }
+    }, 1000);
 }
 
 // ゲーム終了
@@ -294,7 +320,7 @@ function playGame(words) {
         const currentWord = wordDisplay.innerText.trim().toLowerCase();
         const inputWord = userInput.value.trim().toLowerCase();
         if (inputWord === currentWord) {
-            userScore++;
+            userScore += currentWord.length;  // ゆくゆくはひらがなの文字数にする★
             userInput.value = ''; // 入力欄をクリア
             displayNextWord();
         }
