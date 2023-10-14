@@ -13,7 +13,8 @@
     <label for="selectGenre">ジャンル:</label>
     <select id="selectGenre"></select>
     <button onclick="startGame()">ゲームスタート</button>
-    <button onclick="showRegistrationScreen()">ユーザー登録</button>
+    <button onclick="showAnotherScreen('registrationScreen')">ユーザー登録</button>
+    <button onclick="showAnotherScreen('wordRegistrationScreen')">単語登録</button>
 </div>
 
 <!-- カウントダウン表示用の要素 -->
@@ -28,13 +29,37 @@
     <button onclick="endGame()">ゲーム中断</button>
 </div>
 
-    <!-- ユーザー登録画面 -->
-    <div id="registrationScreen" style="display: none;">
-        <label for="usernameInput">ユーザー名:</label>
-        <input type="text" id="usernameInput" autocomplete="off">
-        <button onclick="registerUser()">登録</button>
-        <button onclick="goBackToHome()">戻る</button>
+<!-- ユーザー登録画面 -->
+<div id="registrationScreen" style="display: none;">
+    <label for="usernameInput">ユーザー名:</label>
+    <input type="text" id="usernameInput" autocomplete="off">
+    <button onclick="registerUser()">登録</button>
+    <button onclick="goBackToHome('registrationScreen')">戻る</button>
+</div>
+
+<!-- 単語登録画面 -->
+<div id="wordRegistrationScreen" style="display: none;">
+    
+    <!-- 既存ジャンルの単語追加フォーム -->
+    <div id="existingGenreForm">
+        <label for="existingGenre">ジャンル:</label>
+        <select id="existingGenre"></select>
+        <label for="existingWord">単語:</label>
+        <input type="text" id="existingWord">
+        <button onclick="registerExistingWord()">登録</button>
     </div>
+
+    <!-- 新規ジャンルの単語追加フォーム -->
+    <div id="newGenreForm">
+        <label for="newGenre">新規ジャンル名:</label>
+        <input type="text" id="newGenre">
+        <label for="newWord">単語:</label>
+        <input type="text" id="newWord">
+        <button onclick="registerNewWord()">登録</button>
+    </div>
+
+    <button onclick="goBackToHome('wordRegistrationScreen')">戻る</button>
+</div>
 
     <script src="script.js"></script>
 </body>

@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
-import pdb
+# import pdb
 
 app = Flask(__name__)
 CORS(app)  # すべてのリクエストに対してCORSを有効にする
@@ -108,8 +108,6 @@ def execute_insert_sql(table_name, columns, values):
 
 # データベースからジャンルごとの単語を取得する関数
 def get_words_from_genre(selected_genre_name):
-    # ここでデータベースから単語を取得するクエリを実行する
-    # 例: words = ['寿司', 'ラーメン', 'ピザ', 'パスタ']
     sql_select_query = f"SELECT word FROM typing_words WHERE genre = '{selected_genre_name}'"
     words = execute_select_sql(sql_select_query)   # ジャンル名を取得
     return words
@@ -198,9 +196,46 @@ def save_score():
     except Exception as e:
         return jsonify({'message': 'Failed to save score.', 'error': str(e)}), 500
 
+# 既存ジャンルの複数単語を登録するエンドポイント
+@app.route('/register_existing_words', methods=['POST'])
+def register_existing_words():
+    data = request.get_json()
+    genre = data.get('genre')
+    words = data.get('words')  # 複数の単語が配列として送信される
+    
+    try:
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        for word in words:
+            cursor.execute("INSERT INTO typing_words (genre, word) VALUES (?, ?)", (genre, word.strip()))  # 単語をトリムして登録
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        print("Error inserting words:", e)
+        return jsonify({'success': False})
 
+# 新規ジャンルと複数単語を登録するエンドポイント
+@app.route('/register_new_words', methods=['POST'])
+def register_new_words():
+    data = request.get_json()
+    genre = data.get('genre')
+    words = data.get('words')  # 複数の単語が配列として送信される
+    
+    try:
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        for word in words:
+            cursor.execute("INSERT INTO typing_words (genre, word) VALUES (?, ?)", (genre, word.strip()))  # 単語をトリムして登録
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        print("Error inserting words:", e)
+        return jsonify({'success': False})
 
+# メイン処理開始
 if __name__ == '__main__':
-    # app.run()
-    app.run(debug=True)
+    app.run()
+    # app.run(debug=True)
     

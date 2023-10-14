@@ -47,34 +47,22 @@ function getSelectedValue(selectElement, message) {
 // 画面関連
 /////////////////////////
 
-// ホーム → ユーザー登録画面
-function showRegistrationScreen() {
+// ホーム → 別画面
+// 例) showAnotherScreen('gameScreen')
+// 例) showAnotherScreen('registrationScreen')
+// 例) showAnotherScreen('wordRegistrationScreen')
+function showAnotherScreen(anotherScreen) {
     document.getElementById('homeScreen').style.display = 'none';
-    document.getElementById('registrationScreen').style.display = 'block';
+    document.getElementById(anotherScreen).style.display = 'block';
+    getDataFromServer('/get_genre_names',existingGenre);  // 既存ジャンルを取得する関数を実行
 }
 
-// ユーザー登録画面 → ホーム画面
-function hideRegistrationScreen() {
-    document.getElementById('registrationScreen').style.display = 'none';
+// ホーム画面に戻る
+function goBackToHome(currentScreen) {
+    document.getElementById(currentScreen).style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
-    getDataFromServer('/get_user_names',selectUser);
-}
-
-// 登録せずにホーム画面に戻る
-function goBackToHome() {
-    hideRegistrationScreen();
-}
-
-// ホーム画面 → ゲーム画面
-function showGameScreen() {
-    document.getElementById('homeScreen').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'block';
-}
-
-// ゲーム画面 → ホーム画面
-function hideGameScreen() {
-    document.getElementById('gameScreen').style.display = 'none';
-    document.getElementById('homeScreen').style.display = 'block';
+    getDataFromServer('/get_user_names',selectUser);    // ユーザー名を取得する関数を実行
+    getDataFromServer('/get_genre_names',selectGenre);  // ジャンルを取得する関数を実行
 }
 
 ////////////////////////
@@ -136,7 +124,7 @@ function registerUser() {
                 clearInput('usernameInput');
                 alert('ユーザー名「'+data.username+'」を登録しました。');
                 // ユーザー登録が完了したら、ホーム画面に戻る
-                hideRegistrationScreen();
+                goBackToHome('registrationScreen');
             } else if (data.message === "そのユーザー名は既に存在します。") {
                 alert('「'+username+'」は既に登録されています。');
                 clearInput('usernameInput');
@@ -174,6 +162,79 @@ async function getIdFromUser() {
         // エラーハンドリングを行うか、適切な値を返す必要がある
     }
 }
+
+///////////////////////
+// 単語登録関係
+///////////////////////
+
+// 既存ジャンルの単語を登録する関数
+function registerExistingWord() {
+    const selectedGenreName = getSelectedValue("existingGenre", "ジャンルを選択してください。");
+    const existingWordInput = document.getElementById("existingWord");
+    const existingWords = existingWordInput.value.split(','); // 入力された単語をカンマで分割
+    
+    // サーバーにデータを送信
+    const requestData = {
+        genre: selectedGenreName,
+        words: existingWords // 複数の単語を配列として送信
+    };
+
+    fetch('/register_existing_words', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('単語が登録されました！');
+            // 他の必要な処理を追加
+        } else {
+            alert('単語の登録に失敗しました。');
+        }
+    })
+    .catch(error => {
+        console.error('エラー:', error);
+        alert('エラーが発生しました。');
+    });
+}
+
+// 新規ジャンルと単語を登録する関数
+function registerNewWord() {
+    const newGenreName = getSelectedValue("newGenre", "ジャンルを入力してください。");
+    const newWordInput = document.getElementById("newWord");
+    const newWords = newWordInput.value.split(','); // 入力された単語をカンマで分割
+    
+    // サーバーにデータを送信
+    const requestData = {
+        genre: newGenreName,
+        words: newWords // 複数の単語を配列として送信
+    };
+
+    fetch('/register_new_words', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('単語が登録されました！');
+            // 他の必要な処理を追加
+        } else {
+            alert('単語の登録に失敗しました。');
+        }
+    })
+    .catch(error => {
+        console.error('エラー:', error);
+        alert('エラーが発生しました。');
+    });
+}
+
 
 
 /////////////////////
@@ -241,7 +302,7 @@ function endGame() {
     console.log('userScore:'+userScore);
     saveUserScoreToServer(userScore);
     alert(selectedUserName+'さんのスコアは '+userScore+'です')
-    hideGameScreen();
+    goBackToHome('gameScreen');
     // タイマーをクリアして、自動終了を防ぐ
     clearTimeout(endGameTimer);
 }
