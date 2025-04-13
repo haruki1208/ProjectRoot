@@ -145,6 +145,8 @@ def main_game():
     def_enemy_hp = difficulty_settings[difficulty]["enemy_hp"]
     enemy_hp = def_enemy_hp
     enemy_bullet_interval = difficulty_settings[difficulty]["enemy_bullet_interval"]
+    
+    last_item_spawn_time = pygame.time.get_ticks() # アイテム生成の初期化
 
     running = True
     while running:
