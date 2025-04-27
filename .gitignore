@@ -6,4 +6,4 @@
 
 # Pythonの献立アプリの無視対象
 python/02_アプリ/献立提案アプリ/src/.env
-python/02_アプリ/献立提案アプリ/data/*
+python/02_アプリ/献立提案アプリ/data/
