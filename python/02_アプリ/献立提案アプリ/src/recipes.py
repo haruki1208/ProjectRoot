@@ -8,7 +8,7 @@ load_dotenv()
 # APIキーを取得
 API_KEY = os.getenv('YOUTUBE_API_KEY')
 
-def search_youtube_videos(ingredients, max_results=5):
+def search_youtube_videos(ingredients, max_results=3):
     query = ' '.join(ingredients) + ' レシピ'
     url = 'https://www.googleapis.com/youtube/v3/search'
     

@@ -50,49 +50,49 @@ def remove_selected_ingredients(selected_recipe, ingredients_list):
 
     print(f"使われた食材: {used_ingredients} が削除されました。")
     
-# def remove_ingredient(ingredients_list):
-#     """食材を削除する"""
-#     display_ingredients(ingredients_list)
-#     try:
-#         idx = int(input("削除する食材の番号を入力してください（キャンセルは0）: "))
-#         if idx == 0:
-#             print("削除をキャンセルしました。")
-#             return
-#         removed_item = ingredients_list.pop(idx - 1)
-#         print(f"「{removed_item}」を削除しました。")
-#     except (ValueError, IndexError):
-#         print("無効な入力です。")
+def remove_ingredient(ingredients_list):
+    """食材を削除する"""
+    display_ingredients(ingredients_list)
+    try:
+        idx = int(input("削除する食材の番号を入力してください（キャンセルは0）: "))
+        if idx == 0:
+            print("削除をキャンセルしました。")
+            return
+        removed_item = ingredients_list.pop(idx - 1)
+        print(f"「{removed_item}」を削除しました。")
+    except (ValueError, IndexError):
+        print("無効な入力です。")
 
-# def manage_ingredients():
-#     """ターミナル上で食材を管理するメイン関数"""
-#     ingredients = load_ingredients()
+def manage_ingredients():
+    """ターミナル上で食材を管理するメイン関数"""
+    ingredients = load_ingredients()
 
-#     while True:
-#         print("\n--- 食材管理メニュー ---")
-#         print("1. 食材を表示する")
-#         print("2. 食材を追加する")
-#         print("3. 食材を削除する")
-#         print("4. 保存して終了")
-#         print("5. 保存せずに終了")
+    while True:
+        print("\n--- 食材管理メニュー ---")
+        print("1. 食材を表示する")
+        print("2. 食材を追加する")
+        print("3. 食材を削除する")
+        print("4. 保存して終了")
+        print("5. 保存せずに終了")
 
-#         choice = input("番号を選んでください: ").strip()
+        choice = input("番号を選んでください: ").strip()
 
-#         if choice == '1':
-#             display_ingredients(ingredients)
-#         elif choice == '2':
-#             add_ingredient(ingredients)
-#         elif choice == '3':
-#             remove_ingredient(ingredients)
-#         elif choice == '4':
-#             save_ingredients(ingredients)
-#             print("保存しました。終了します。")
-#             break
-#         elif choice == '5':
-#             print("保存せずに終了します。")
-#             break
-#         else:
-#             print("無効な選択です。もう一度入力してください。")
+        if choice == '1':
+            display_ingredients(ingredients)
+        elif choice == '2':
+            add_ingredient(ingredients)
+        elif choice == '3':
+            remove_ingredient(ingredients)
+        elif choice == '4':
+            save_ingredients(ingredients)
+            print("保存しました。終了します。")
+            break
+        elif choice == '5':
+            print("保存せずに終了します。")
+            break
+        else:
+            print("無効な選択です。もう一度入力してください。")
 
-# if __name__ == "__main__":
-#     manage_ingredients()
+if __name__ == "__main__":
+    manage_ingredients()
     
