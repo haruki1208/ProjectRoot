@@ -1,5 +1,6 @@
 import json
 import os
+from utils import get_user_choice
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "../data/ingredients.json")
 
@@ -47,14 +48,15 @@ def add_ingredient(ingredients_list):
 # 選ばれた献立に使われた食材を削除する関数
 def remove_selected_ingredients(selected_recipe, ingredients_list):
     # 献立の食材を選択されたレシピから取得する
-    used_ingredients = selected_recipe.get("ingredients_list", [])
+    used_ingredients_list = selected_recipe.get("used_ingredients", [])
 
     # 食材リストから使用された食材を削除
-    for ingredient in used_ingredients:
+    for ingredient in used_ingredients_list:
         if ingredient in ingredients_list:
-            ingredients_list.pop(ingredient)
+            ingredients_list.remove(ingredient)
 
-    print(f"使われた食材: {used_ingredients} が削除されました。")
+    print(f"使われた食材: {used_ingredients_list} が削除されました。")
+    save_ingredients(ingredients_list)  # 変更を保存
 
 
 def remove_ingredient(ingredients_list):
@@ -83,19 +85,19 @@ def manage_ingredients():
         print("4. 保存して終了")
         print("5. 保存せずに終了")
 
-        choice = input("番号を選んでください: ").strip()
+        choice = get_user_choice("番号を選んでください: ")
 
-        if choice == "1":
+        if choice == 1:
             display_ingredients(ingredients)
-        elif choice == "2":
+        elif choice == 2:
             add_ingredient(ingredients)
-        elif choice == "3":
+        elif choice == 3:
             remove_ingredient(ingredients)
-        elif choice == "4":
+        elif choice == 4:
             save_ingredients(ingredients)
             print("保存しました。終了します。")
             break
-        elif choice == "5":
+        elif choice == 5:
             print("保存せずに終了します。")
             break
         else:

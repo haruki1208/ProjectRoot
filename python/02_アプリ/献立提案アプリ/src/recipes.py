@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import requests
+import random  # ランダム選択のために追加
 
 # .envファイルから環境変数を読み込み
 load_dotenv()
@@ -9,8 +10,14 @@ load_dotenv()
 API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 
+# YouTube動画を検索する関数
 def search_youtube_videos(ingredients, max_results=3):
-    query = " ".join(ingredients) + " レシピ"
+    # ingredients からランダムに 1 から 3 個の値を取得
+    num_to_select = random.randint(1, 3)  # 1〜3のどれかをランダムに決める
+    random_ingredients = random.sample(
+        ingredients, k=min(len(ingredients), num_to_select)
+    )
+    query = " ".join(random_ingredients) + " レシピ"
     url = "https://www.googleapis.com/youtube/v3/search"
 
     params = {
@@ -30,11 +37,14 @@ def search_youtube_videos(ingredients, max_results=3):
         video_id = item["id"]["videoId"]
         title = item["snippet"]["title"]
         link = f"https://www.youtube.com/watch?v={video_id}"
-        recipes.append({"title": title, "link": link})
+        recipes.append(
+            {"title": title, "link": link, "used_ingredients": random_ingredients}
+        )
 
     return recipes
 
 
+# 献立候補を表示する関数
 def display_recipes(recipes):
     """献立候補をターミナルに表示"""
     print("\n--- 献立候補 ---")

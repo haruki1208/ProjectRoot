@@ -1,3 +1,4 @@
+from utils import get_user_choice
 from recipes import search_youtube_videos, display_recipes
 from ingredients import (
     load_ingredients,
@@ -26,11 +27,11 @@ def suggest_recipes():
         display_recipes(recipes)
 
         # ユーザーが選択するか、リトライか選ぶ
-        user_choice = input(
+        user_choice = get_user_choice(
             "気に入った献立があれば選んで、なければ「0」と入力してください: "
         )
 
-        if user_choice.lower() == "0":
+        if user_choice == 0:
             print("別の献立を探します...")
             seen_recipes.extend(recipes)  # 提案した献立を記録
             continue  # リトライする
@@ -53,15 +54,15 @@ def main():
         print("2. 食材管理")
         print("3. 終了")
 
-        choice = input("番号を選んでください: ").strip()
+        choice = get_user_choice("番号を選んでください: ")
 
-        if choice == "1":
+        if choice == 1:
             suggest_recipes()  # 献立提案を開始
             continue
-        elif choice == "2":
+        elif choice == 2:
             manage_ingredients()  # 食材管理を開始
             continue
-        elif choice == "3":
+        elif choice == 3:
             print("アプリを終了します。")
             break
         else:
