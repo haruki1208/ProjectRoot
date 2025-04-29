@@ -12,10 +12,19 @@ API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 # YouTube動画を検索する関数
 def search_youtube_videos(ingredients, max_results=3):
-    # ingredients からランダムに 1 から 3 個の値を取得
+    # チェックが入っている食材のみを抽出
+    checked_ingredients = [
+        ingredient["name"] for ingredient in ingredients if ingredient["checked"]
+    ]
+
+    # チェックされた食材がない場合は空のリストを返す
+    if not checked_ingredients:
+        return []
+
+    # チェックされた食材からランダムに 1 から 3 個の値を取得
     num_to_select = random.randint(1, 3)  # 1〜3のどれかをランダムに決める
     random_ingredients = random.sample(
-        ingredients, k=min(len(ingredients), num_to_select)
+        checked_ingredients, k=min(len(checked_ingredients), num_to_select)
     )
     query = " ".join(random_ingredients) + " レシピ"
     url = "https://www.googleapis.com/youtube/v3/search"
