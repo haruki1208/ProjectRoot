@@ -8,3 +8,4 @@
 python/02_アプリ/献立提案アプリ/src/.env
 python/02_アプリ/献立提案アプリ/data/
 *.bat
+*tempCodeRunnerFile.py
