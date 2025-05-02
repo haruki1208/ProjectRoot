@@ -1,6 +1,7 @@
 import json
 import os
-from utils import get_user_choice
+
+# from utils import get_user_choice
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "../data/ingredients.json")
 
