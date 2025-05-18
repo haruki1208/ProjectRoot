@@ -11,9 +11,20 @@ python/02_アプリ/献立提案アプリ/data/
 *tempCodeRunnerFile.py
 
 # Android Studioの無視対象
-#*.iml
-#*.hprof
-*.idea
-*.gradle
-#*.apk
-**/build/
+# *.iml
+# *.gradle
+# #/local.properties
+# **/.idea/caches
+# **/.idea/libraries
+# **/.idea/modules.xml
+# **/.idea/workspace.xml
+# **/.idea/navEditor.xml
+# **/.idea/assetWizardSettings.xml
+# *.DS_Store
+# **/build
+# **/captures
+# *.externalNativeBuild
+# *.cxx
+# *local.properties
+# **/shelf/
+# **/workspace.xml
