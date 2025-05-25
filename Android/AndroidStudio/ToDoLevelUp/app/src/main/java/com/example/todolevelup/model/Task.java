@@ -1,6 +1,4 @@
-package com.example.todolevelup;
-
-import java.util.Date;
+package com.example.todolevelup.model;
 
 import java.util.Date;
 import java.util.UUID;

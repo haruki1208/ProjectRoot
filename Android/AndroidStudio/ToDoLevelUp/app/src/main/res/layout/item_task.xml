@@ -5,23 +5,32 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingVertical="4dp">
+    android:paddingVertical="0dp">
 
     <!-- チェックボックス -->
     <CheckBox
         android:id="@+id/taskCheckBox"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
     <!-- タスク入力 -->
     <EditText
         android:id="@+id/taskEditText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="29dp"
         android:layout_weight="1"
-        android:hint="タスクを入力"
         android:background="@android:color/transparent"
-        android:textSize="16sp"
-        android:paddingStart="8dp"
-        android:inputType="text" />
+        android:hint="タスクを入力"
+        android:inputType="text"
+        android:paddingStart="2dp"
+        android:textSize="12sp" />
+
+    <ImageButton
+        android:id="@+id/deleteButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_delete"
+        android:contentDescription="削除" />
+
 </LinearLayout>
