@@ -10,7 +10,6 @@ import android.widget.EditText;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -28,24 +27,24 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_TASK = 0;
     private static final int VIEW_TYPE_ADD_BUTTON = 1;
 
-    private List<Task> taskList;
-
+    private List<Task> allTasks;      // 全タスク（親子構造あり）
+    private List<Task> displayList;   // 表示順にフラット展開されたタスク
     private Context context;
 
-    public TaskAdapter(Context context, List<Task> taskList) {
+    public TaskAdapter(Context context, List<Task> allTasks, List<Task> displayList) {
         this.context = context;
-        this.taskList = taskList;
-    }
-
-
-    @Override
-    public int getItemViewType(int position) {
-        return position == taskList.size() ? VIEW_TYPE_ADD_BUTTON : VIEW_TYPE_TASK;
+        this.allTasks = allTasks;
+        this.displayList = displayList;
     }
 
     @Override
     public int getItemCount() {
-        return taskList.size() + 1; // 最後に追加ボタン用ビュー
+        return displayList.size() + 1; // 最後に追加ボタン用ビュー
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position == displayList.size() ? VIEW_TYPE_ADD_BUTTON : VIEW_TYPE_TASK;
     }
 
     @NonNull
@@ -63,13 +62,21 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof TaskViewHolder) {
-            Task task = taskList.get(position);
+            Task task = displayList.get(position);
             TaskViewHolder vh = (TaskViewHolder) holder;
 
             vh.editText.setText(task.getText());
             vh.checkBox.setChecked(task.isChecked());
 
-            vh.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> task.setChecked(isChecked));
+            // --- ParentId をたどってインデントレベルを算出 ---
+            int indentLevel = calculateIndentLevel(task);
+            int indentPx = (int) (indentLevel * 32 * vh.itemView.getResources().getDisplayMetrics().density); // 32dp/階層
+            vh.indentWrapper.setPadding(indentPx, 0, 0, 0);
+
+            vh.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                task.setChecked(isChecked);
+                TaskStorage.saveTasks(context, allTasks);
+            });
 
             vh.editText.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -81,38 +88,65 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             vh.deleteButton.setOnClickListener(v -> {
                 int pos = holder.getAdapterPosition();
+                Task target = displayList.get(pos);
                 new AlertDialog.Builder(holder.itemView.getContext())
-//                    .setTitle("タスクの削除")
-                    .setMessage("「" + task.getText() + "」を削除しますか？")
-                    .setPositiveButton("削除", (dialog, which) -> {
-                        taskList.remove(pos);
-                        notifyItemRemoved(pos);
-                        notifyItemRangeChanged(pos, taskList.size());
-                        TaskStorage.saveTasks(context, taskList);
-                    })
-                    .setNegativeButton("キャンセル", null)
-                    .show();
+                        .setMessage("「" + target.getText() + "」を削除しますか？")
+                        .setPositiveButton("削除", (dialog, which) -> {
+                            allTasks.remove(target);
+                            displayList.remove(pos);
+                            notifyItemRemoved(pos);
+                            TaskStorage.saveTasks(context, allTasks);
+                        })
+                        .setNegativeButton("キャンセル", null)
+                        .show();
             });
 
         } else if (holder instanceof AddButtonViewHolder) {
             ((AddButtonViewHolder) holder).addButton.setOnClickListener(v -> {
-                taskList.add(new Task("", false, 0, null, new Date()));
-                notifyItemInserted(taskList.size() - 1);
-                TaskStorage.saveTasks(context, taskList);
+                Task newTask = new Task("", false, null, new Date());
+                allTasks.add(newTask);
+                displayList.add(newTask);
+                notifyItemInserted(displayList.size() - 1);
+                TaskStorage.saveTasks(context, allTasks);
             });
         }
+    }
+
+    private int calculateIndentLevel(Task task) {
+        int level = 0;
+        String parentId = task.getParentId();
+        while (parentId != null) {
+            Task parent = findTaskById(parentId);
+            if (parent == null) break;
+            level++;
+            parentId = parent.getParentId();
+        }
+        return level;
+    }
+
+    private Task findTaskById(String id) {
+        for (Task t : allTasks) {
+            if (t.getId().equals(id)) return t;
+        }
+        return null;
+    }
+
+    public void setDisplayList(List<Task> displayList) {
+        this.displayList = displayList;
     }
 
     public static class TaskViewHolder extends RecyclerView.ViewHolder {
         CheckBox checkBox;
         EditText editText;
         ImageButton deleteButton;
+        View indentWrapper;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
             checkBox = itemView.findViewById(R.id.taskCheckBox);
             editText = itemView.findViewById(R.id.taskEditText);
             deleteButton = itemView.findViewById(R.id.deleteButton);
+            indentWrapper = itemView.findViewById(R.id.indentWrapper);
         }
     }
 
@@ -125,4 +159,5 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 }
+
 

@@ -9,14 +9,12 @@ public class Task {
     private String parentId;    // 親タスクのID（nullなら親タスク）
     private String text;        // 内容
     private boolean isChecked;  // チェック状態
-    private int indentLevel;    // 表示インデント用（0＝親）
     private Date date;          // 所属日付
 
-    public Task(String text, boolean isChecked, int indentLevel, String parentId, Date date) {
+    public Task(String text, boolean isChecked, String parentId, Date date) {
         this.id = UUID.randomUUID().toString();
         this.text = text;
         this.isChecked = isChecked;
-        this.indentLevel = indentLevel;
         this.parentId = parentId;
         this.date = date;
     }
@@ -39,9 +37,6 @@ public class Task {
         return isChecked;
     }
 
-    public int getIndentLevel() {
-        return indentLevel;
-    }
 
     public Date getDate() {
         return date;
@@ -58,10 +53,6 @@ public class Task {
 
     public void setChecked(boolean checked) {
         isChecked = checked;
-    }
-
-    public void setIndentLevel(int indentLevel) {
-        this.indentLevel = indentLevel;
     }
 
     public void setDate(Date date) {
